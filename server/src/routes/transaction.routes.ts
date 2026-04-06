@@ -10,6 +10,9 @@ import {
   protect,
 } from "../middleware/auth.middleware";
 
+import { validate } from "../middleware/validate.middleware";
+import { transactionSchema } from "../validators/transaction.validator";
+
 const router = Router();
 
 router.get(
@@ -23,6 +26,7 @@ router.post(
   "/",
   protect,
   authorize("admin"),
+  validate(transactionSchema),
   createTransaction
 );
 

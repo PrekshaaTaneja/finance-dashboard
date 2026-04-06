@@ -5,6 +5,10 @@ import morgan from "morgan";
 import authRoutes from "./routes/auth.routes.js";
 import transactionRoutes from "./routes/transaction.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
+import {
+  globalErrorHandler,
+  notFoundHandler,
+} from "./middleware/error.middleware";
 
 const app = express();
 
@@ -15,6 +19,8 @@ app.use(morgan("dev"));
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/transactions", transactionRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
+app.use(notFoundHandler);
+app.use(globalErrorHandler);
 
 app.get("/api/v1/health", (_req, res) => {
   res.status(200).json({

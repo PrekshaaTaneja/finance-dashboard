@@ -8,10 +8,16 @@ import {
   authorize,
 } from "../middleware/auth.middleware.js";
 
+import { validate } from "../middleware/validate.middleware";
+import {
+  loginSchema,
+  registerSchema,
+} from "../validators/auth.validator";
+
 const router = Router();
 
-router.post("/register", registerUser);
-router.post("/login", loginUser);
+router.post("/register", validate(registerSchema), registerUser);
+router.post("/login", validate(loginSchema), loginUser);
 
 router.get(
   "/admin-only",
