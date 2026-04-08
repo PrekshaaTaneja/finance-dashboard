@@ -16,7 +16,48 @@ import {
 
 const router = Router();
 
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *               - role
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *                 enum: [viewer, analyst, admin]
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ */
 router.post("/register", validate(registerSchema), registerUser);
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Login user
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Login successful
+ */
 router.post("/login", validate(loginSchema), loginUser);
 
 router.get(

@@ -15,6 +15,17 @@ import { transactionSchema } from "../validators/transaction.validator";
 
 const router = Router();
 
+/**
+ * @swagger
+ * /transactions:
+ *   get:
+ *     summary: Get all transactions
+ *     tags: [Transactions]
+ *     responses:
+ *       200:
+ *         description: Transactions fetched successfully
+ */
+
 router.get(
   "/",
   protect,
