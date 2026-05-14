@@ -36,7 +36,7 @@ router.get(
 router.post(
   "/",
   protect,
-  authorize("admin"),
+  authorize("admin", "analyst"),
   validate(transactionSchema),
   createTransaction
 );

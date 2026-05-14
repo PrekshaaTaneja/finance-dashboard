@@ -4,6 +4,7 @@ import {
   getDashboardSummary,
   getMonthlyTrend,
   getRecentTransactions,
+  getAdvancedAnalytics,
 } from "../controllers/dashboard.controller";
 import {
   authorize,
@@ -32,5 +33,8 @@ router.get("/summary", getDashboardSummary);
 router.get("/categories", getCategoryBreakdown);
 router.get("/trends", getMonthlyTrend);
 router.get("/recent", getRecentTransactions);
-
+router.get(
+  "/advanced-analytics",
+  getAdvancedAnalytics
+);
 export default router;

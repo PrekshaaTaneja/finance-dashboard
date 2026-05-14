@@ -31,12 +31,22 @@ export const getTransactions = async (
   res: Response
 ) => {
   try {
-    const { type, category, page = 1, limit = 10 } = req.query;
+    const {
+        type,
+        category,
+        page = 1,
+        limit = 8,
+    } = req.query;
 
     const filters: any = {};
 
     if (type) filters.type = type;
-    if (category) filters.category = category;
+    if (category) {
+      filters.category = {
+        $regex: category,
+        $options: "i",
+      };
+    }
 
     const skip = (Number(page) - 1) * Number(limit);
 

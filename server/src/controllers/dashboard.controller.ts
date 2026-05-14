@@ -72,16 +72,18 @@ export const getMonthlyTrend = async (
   _req: AuthRequest,
   res: Response
 ) => {
-  try {
+  try { 
     const trends = await Transaction.aggregate([
       {
         $group: {
-          _id: { $month: "$date" },
+          _id: {
+            month: { $month: "$date" },
+          },
           total: { $sum: "$amount" },
         },
       },
       {
-        $sort: { "_id": 1 },
+        $sort: { month: 1 },
       },
     ]);
 
@@ -119,3 +121,122 @@ export const getRecentTransactions = async (
     });
   }
 };
+
+export const getAdvancedAnalytics =
+  async (
+    _req: AuthRequest,
+    res: Response
+  ) => {
+    try {
+      const transactions =
+        await Transaction.find();
+
+      const totalTransactions =
+        transactions.length;
+
+      const totalIncome =
+        transactions
+          .filter(
+            (t) =>
+              t.type === "income"
+          )
+          .reduce(
+            (acc, curr) =>
+              acc + curr.amount,
+            0
+          );
+
+      const totalExpense =
+        transactions
+          .filter(
+            (t) =>
+              t.type === "expense"
+          )
+          .reduce(
+            (acc, curr) =>
+              acc + curr.amount,
+            0
+          );
+
+      const averageTransaction =
+        totalTransactions > 0
+          ? (
+              (totalIncome +
+                totalExpense) /
+              totalTransactions
+            ).toFixed(2)
+          : 0;
+
+      const categoryTotals:
+        Record<string, number> =
+        {};
+
+      transactions.forEach((t) => {
+        if (t.type === "expense") {
+          categoryTotals[
+            t.category
+          ] =
+            (categoryTotals[
+              t.category
+            ] || 0) + t.amount;
+        }
+      });
+
+      let topCategory =
+        "No Expenses";
+
+      let maxAmount = 0;
+
+      for (const category in categoryTotals) {
+
+        const amount =
+          categoryTotals[category] ?? 0;
+
+        if (amount > maxAmount) {
+
+          maxAmount = amount;
+
+          topCategory = category;
+        }
+      }
+
+      const savingsRate =
+        totalIncome > 0
+          ? (
+              ((totalIncome -
+                totalExpense) /
+                totalIncome) *
+              100
+            ).toFixed(1)
+          : 0;
+
+      res.status(200).json({
+        success: true,
+
+        data: {
+          totalTransactions,
+
+          averageTransaction,
+
+          topCategory,
+
+          savingsRate,
+
+          incomeExpenseRatio:
+            totalExpense > 0
+              ? (
+                  totalIncome /
+                  totalExpense
+                ).toFixed(2)
+              : 0,
+        },
+      });
+
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message:
+          "Failed to fetch analytics",
+      });
+    }
+  };

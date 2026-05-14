@@ -8,11 +8,13 @@ import authRoutes from "./routes/auth.routes";
 import transactionRoutes from "./routes/transaction.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 
-import { swaggerSpec } from "./docs/swagger";
+import swaggerSpec from "./docs/swagger";
 import {
   globalErrorHandler,
   notFoundHandler,
 } from "./middleware/error.middleware";
+import userRoutes from "./routes/user.routes";
+import budgetRoutes from "./routes/budget.routes";
 
 const app = express();
 
@@ -20,6 +22,8 @@ app.use(express.json());
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/budgets", budgetRoutes);
 
 /* ✅ Health route */
 app.get("/api/v1/health", (_req, res) => {
