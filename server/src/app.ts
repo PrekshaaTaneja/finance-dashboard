@@ -28,9 +28,10 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(
   cors({
-    origin:
-      process.env.CLIENT_URL ||
+    origin: [
       "http://localhost:5173",
+      "https://finance-dashboard-re2jhj4w0-preksha-tanejas-projects.vercel.app",
+    ],
     credentials: true,
   })
 );
