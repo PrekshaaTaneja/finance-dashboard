@@ -19,6 +19,8 @@ import budgetRoutes from "./routes/budget.routes.js";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.use(express.json());
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -30,7 +32,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://finance-dashboard-re2jhj4w0-preksha-tanejas-projects.vercel.app",
+      "https://finance-dashboard-taupe-tau.vercel.app",
     ],
     credentials: true,
   })
