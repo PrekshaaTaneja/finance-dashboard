@@ -8,11 +8,11 @@ import {
   authorize,
 } from "../middleware/auth.middleware.js";
 
-import { validate } from "../middleware/validate.middleware";
+import { validate } from "../middleware/validate.middleware.js";
 import {
   loginSchema,
   registerSchema,
-} from "../validators/auth.validator";
+} from "../validators/auth.validator.js";
 
 const router = Router();
 
