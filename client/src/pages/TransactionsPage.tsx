@@ -1,11 +1,11 @@
 import { useState } from "react";
 
-import AddTransactionModal from "@/components/AddTransactionModal";
+// import AddTransactionModal from "@/components/AddTransactionModal";
 import TransactionTable from "@/components/TransactionTable";
 import { Input } from "@/components/ui/input";
 
 const TransactionsPage = () => {
-  const [refresh, setRefresh] =
+  const [refresh] =
     useState(false);
 
   const [search, setSearch] =
@@ -14,9 +14,9 @@ const TransactionsPage = () => {
   const [type, setType] =
     useState("");
 
-  const triggerRefresh = () => {
-    setRefresh((prev) => !prev);
-  };
+  // const triggerRefresh = () => {
+  //   setRefresh((prev) => !prev);
+  // };
 
   return (
     <div className="space-y-6">

@@ -29,19 +29,19 @@ import { useTransactions } from "@/hooks/useTransactions";
 
 import { queryKeys } from "@/lib/queryKeys";
 
-interface Transaction {
-  _id: string;
+// interface Transaction {
+//   _id: string;
 
-  category: string;
+//   category: string;
 
-  amount: number;
+//   amount: number;
 
-  type: "income" | "expense";
+//   type: "income" | "expense";
 
-  date: string;
+//   date: string;
 
-  notes?: string;
-}
+//   notes?: string;
+// }
 
 interface Props {
   refresh: boolean;
@@ -52,7 +52,7 @@ interface Props {
 }
 
 const TransactionTable = ({
-  refresh,
+  // refresh,
   search,
   type,
 }: Props) => {

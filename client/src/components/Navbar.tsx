@@ -2,7 +2,7 @@ import {
   Menu,
 } from "lucide-react";
 
-import { useEffect, useState } from "react";
+// import { useEffect, useState } from "react";
 
 import { useAuth } from "@/context/AuthContext";
 
@@ -15,12 +15,12 @@ const Navbar = () => {
   const { toggleSidebar } =
     useSidebarStore();
 
-  const [mounted, setMounted] =
-    useState(false);
+  // const [mounted, setMounted] =
+  //   useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // useEffect(() => {
+  //   setMounted(true);
+  // }, []);
 
   return (
     <header
@@ -91,7 +91,7 @@ const Navbar = () => {
               w-10
               h-10
               rounded-full
-              bg-gradient-to-r
+              bg-linear-to-r
               from-indigo-500
               to-violet-500
               text-white
