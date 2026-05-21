@@ -107,7 +107,14 @@ const CategoryPieChart = () => {
                 ))}
               </Pie>
 
-              <Tooltip />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: "16px",
+                  border: "none",
+                  boxShadow:
+                    "0 10px 25px rgba(0,0,0,0.08)",
+                }}
+              />
 
             </PieChart>
           </ResponsiveContainer>

@@ -1,11 +1,11 @@
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  Area,
+  AreaChart,
 } from "recharts";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,8 +13,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 
 import api from "@/services/api";
-
-import type { TrendData } from "@/types/dashboard";
 
 const months = [
   "",
@@ -49,13 +47,18 @@ const TrendChart = () => {
 
         const formatted =
           res.data.data.map(
-            (item: TrendData) => ({
-              month: months[item.month],
-              value: item.total,
+            (item: any) => ({
+              month:
+                months[item.month],
+
+              value: Number(
+                item.total
+              ),
             })
           );
 
         setData(formatted);
+
       } catch (error) {
         console.error(
           "Failed to fetch trends",
@@ -70,67 +73,127 @@ const TrendChart = () => {
   return (
     <Card
       className="
-        border-0
+        border
+        border-slate-200
         rounded-3xl
-        bg-white/80
-        backdrop-blur-xl
-        shadow-md
+        bg-white
+        shadow-sm
       "
     >
       <CardContent className="p-6">
 
         <div className="mb-6">
-          <h3 className="text-xl font-bold text-slate-800">
+          <h3 className="text-2xl font-bold text-slate-800">
             Monthly Financial Trends
           </h3>
 
           <p className="text-sm text-slate-500 mt-1">
-            Monitor your financial growth and expenses.
+            Monitor your income and expenses over time.
           </p>
         </div>
 
-        <div className="h-[320px]">
+        <div className="h-[300px] w-full mt-4">
 
           <ResponsiveContainer
             width="100%"
             height="100%"
           >
-            <LineChart data={data}>
+
+            <AreaChart
+              data={data}
+              margin={{
+                top: 10,
+                right: 20,
+                left: -10,
+                bottom: 0,
+              }}
+            >
+
+              <defs>
+
+                <linearGradient
+                  id="gradientColor"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop
+                    offset="0%"
+                    stopColor="#6C63FF"
+                    stopOpacity={0.35}
+                  />
+
+                  <stop
+                    offset="100%"
+                    stopColor="#6C63FF"
+                    stopOpacity={0}
+                  />
+
+                </linearGradient>
+
+              </defs>
 
               <CartesianGrid
-                strokeDasharray="3 3"
+                strokeDasharray="4 4"
                 vertical={false}
-                stroke="#E2E8F0"
+                stroke="#CBD5E1"
               />
 
               <XAxis
                 dataKey="month"
-                tickLine={false}
                 axisLine={false}
+                tickLine={false}
+                tick={{
+                  fill: "#64748B",
+                  fontSize: 12,
+                }}
               />
 
               <YAxis
-                tickLine={false}
                 axisLine={false}
+                tickLine={false}
+                tick={{
+                  fill: "#64748B",
+                  fontSize: 12,
+                }}
               />
 
-              <Tooltip />
+              <Tooltip
+                formatter={(value) => [
+                  `₹${Number(
+                    value
+                  ).toLocaleString()}`,
+                  "Amount",
+                ]}
+                contentStyle={{
+                  borderRadius: "14px",
+                  border: "none",
+                  background: "#0F172A",
+                  color: "white",
+                  padding: "10px 14px",
+                }}
+              />
 
-              <Line
+              <Area
                 type="monotone"
                 dataKey="value"
-                stroke="#6366F1"
+                stroke="#6C63FF"
                 strokeWidth={4}
+                fill="url(#gradientColor)"
                 dot={{
                   r: 5,
-                  fill: "#6366F1",
+                  fill: "#6C63FF",
+                  strokeWidth: 2,
+                  stroke: "#fff",
                 }}
                 activeDot={{
-                  r: 8,
+                  r: 7,
                 }}
               />
 
-            </LineChart>
+            </AreaChart>
+
           </ResponsiveContainer>
 
         </div>

@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+
+import { useQuery } from "@tanstack/react-query";
 
 import KpiCard from "@/components/KpiCard";
 import TrendChart from "@/components/TrendChart";
@@ -6,64 +7,46 @@ import CategoryPieChart from "@/components/CategoryPieChart";
 import RecentTransactions from "@/components/RecentTransactions";
 import AnalyticsCard from "@/components/AnalyticsCard";
 import FinancialInsights from "@/components/FinancialInsights";
-
-import api from "@/services/api";
-
+import PageWrapper from "@/components/PageWrapper";
 import PageHeader from "@/components/PageHeader";
 import SkeletonCard from "@/components/SkeletonCard";
 
 import FadeIn from "@/animations/FadeIn";
 
-import type { AdvancedAnalytics } from "@/types/analytics";
+import {
+  getDashboardSummary,
+  getAdvancedAnalytics,
+} from "@/services/dashboard.service";
+
+import { queryKeys } from "@/lib/queryKeys";
+
+import { formatCurrency } from "@/lib/formatters";
 
 const DashboardPage = () => {
-  const [summary, setSummary] = useState<{
-    totalIncome: number;
-    totalExpense: number;
-    netBalance: number;
-  } | null>(null);
+  const {
+    data: summary,
+    isLoading: summaryLoading,
+  } = useQuery({
+    queryKey:
+      queryKeys.dashboardSummary,
+    queryFn: getDashboardSummary,
+    staleTime: 1000 * 60 * 5,
+  });
 
-  const [analytics, setAnalytics] =
-    useState<AdvancedAnalytics | null>(
-      null
-    );
-
-  const [loading, setLoading] =
-    useState(true);
-
-  useEffect(() => {
-    const fetchSummary = async () => {
-      try {
-        const res = await api.get(
-          "/dashboard/summary"
-        );
-
-        setSummary(res.data.data);
-
-        const analyticsRes =
-          await api.get(
-            "/dashboard/advanced-analytics"
-          );
-
-        setAnalytics(
-          analyticsRes.data.data
-        );
-
-      } catch (error) {
-        console.error(
-          "Failed to fetch dashboard data",
-          error
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSummary();
-  }, []);
+  const {
+    data: analytics,
+    isLoading: analyticsLoading,
+  } = useQuery({
+    queryKey: queryKeys.analytics,
+    queryFn: getAdvancedAnalytics,
+    staleTime: 1000 * 60 * 5,
+  });
 
   // 🔥 Loading State
-  if (loading) {
+  if (
+    summaryLoading ||
+    analyticsLoading
+  ) {
     return (
       <div className="space-y-6">
 
@@ -75,7 +58,7 @@ const DashboardPage = () => {
 
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 2xl:grid-cols-3 gap-5">
 
           <div className="xl:col-span-2">
             <SkeletonCard />
@@ -90,7 +73,7 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="w-full space-y-8">
+    <PageWrapper>
 
       <PageHeader
         title="Finance Dashboard"
@@ -103,17 +86,23 @@ const DashboardPage = () => {
 
           <KpiCard
             title="Total Income"
-            value={`₹${summary?.totalIncome || 0}`}
+            value={formatCurrency(
+              summary?.totalIncome || 0
+            )}
           />
 
           <KpiCard
             title="Expenses"
-            value={`₹${summary?.totalExpense || 0}`}
+            value={formatCurrency(
+              summary?.totalExpense || 0
+            )}
           />
 
           <KpiCard
             title="Net Balance"
-            value={`₹${summary?.netBalance || 0}`}
+            value={formatCurrency(
+              summary?.netBalance || 0
+            )}
           />
 
         </div>
@@ -143,10 +132,10 @@ const DashboardPage = () => {
 
           <AnalyticsCard
             title="Average Transaction"
-            value={`₹${
+            value={formatCurrency(
               analytics?.averageTransaction ||
-              0
-            }`}
+                0
+            )}
             subtitle="Average transaction value"
           />
 
@@ -175,22 +164,26 @@ const DashboardPage = () => {
       <FadeIn delay={0.2}>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
 
-          <div className="lg:col-span-2">
+          <div className="2xl:col-span-2 min-w-0">
             <TrendChart />
           </div>
 
-          <CategoryPieChart />
+          <div className="min-w-0">
+            <CategoryPieChart />
+          </div>
 
         </div>
       </FadeIn>
 
       {/* Insights */}
       <FadeIn delay={0.3}>
-        <FinancialInsights
-          analytics={
-            analytics as AdvancedAnalytics
-          }
-        />
+        {
+          analytics && (
+            <FinancialInsights
+              analytics={analytics}
+            />
+          )
+        }
       </FadeIn>
 
       {/* Recent */}
@@ -198,7 +191,7 @@ const DashboardPage = () => {
         <RecentTransactions />
       </FadeIn>
 
-    </div>
+    </PageWrapper>
   );
 };
 

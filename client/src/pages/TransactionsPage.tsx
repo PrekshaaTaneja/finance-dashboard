@@ -22,25 +22,6 @@ const TransactionsPage = () => {
     <div className="space-y-6">
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-
-        <div>
-          <h1 className="text-3xl font-bold">
-            Transactions
-          </h1>
-
-          <p className="text-gray-500 mt-1">
-            Manage and review all financial records.
-          </p>
-        </div>
-
-        <AddTransactionModal
-          onSuccess={triggerRefresh}
-        />
-
-      </div>
-
-      {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
         <Input
@@ -49,6 +30,7 @@ const TransactionsPage = () => {
           onChange={(e) =>
             setSearch(e.target.value)
           }
+          className="h-11"
         />
 
         <select
@@ -57,14 +39,17 @@ const TransactionsPage = () => {
             setType(e.target.value)
           }
           className="
-            h-10
+            h-11
+            w-full
             rounded-md
             border
             border-input
             bg-background
             px-3
-            py-2
             text-sm
+            focus:outline-none
+            focus:ring-2
+            focus:ring-[#6C63FF]
           "
         >
           <option value="">
@@ -78,6 +63,7 @@ const TransactionsPage = () => {
           <option value="expense">
             Expense
           </option>
+
         </select>
 
       </div>

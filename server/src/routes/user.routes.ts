@@ -4,12 +4,12 @@ import {
   createUser,
   getUsers,
   toggleUserStatus,
-} from "../controllers/user.controller";
+} from "../controllers/user.controller.js";
 
 import {
   protect,
   authorize,
-} from "../middleware/auth.middleware";
+} from "../middleware/auth.middleware.js";
 
 const router = Router();
 

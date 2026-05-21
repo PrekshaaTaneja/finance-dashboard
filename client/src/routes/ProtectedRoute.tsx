@@ -1,4 +1,5 @@
 import { Navigate } from "react-router-dom";
+import Loader from "@/components/Loader";
 
 import {
   type ReactNode,
@@ -12,10 +13,13 @@ const ProtectedRoute = ({
   children: ReactNode;
 }) => {
 
-  const { token } =
-    useAuth();
+  const { token, isLoading } = useAuth();
 
-  if (!token) {
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  if (!token || token === "undefined") {
     return (
       <Navigate to="/login" />
     );

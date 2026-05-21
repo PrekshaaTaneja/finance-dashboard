@@ -13,10 +13,9 @@ import {
   Trash2,
 } from "lucide-react";
 
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
+
+import { useQueryClient } from "@tanstack/react-query";
 
 import api from "@/services/api";
 
@@ -25,6 +24,10 @@ import { toast } from "sonner";
 import EditTransactionModal from "./EditTransactionModal";
 
 import { CSVLink } from "react-csv";
+
+import { useTransactions } from "@/hooks/useTransactions";
+
+import { queryKeys } from "@/lib/queryKeys";
 
 interface Transaction {
   _id: string;
@@ -54,66 +57,24 @@ const TransactionTable = ({
   type,
 }: Props) => {
 
-  const [data, setData] =
-    useState<Transaction[]>([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
   const [page, setPage] =
     useState(1);
 
-  const [totalPages, setTotalPages] =
-    useState(1);
+  const queryClient =
+    useQueryClient();
 
-  const fetchTransactions =
-    async () => {
-      try {
-        setLoading(true);
-
-        const res =
-          await api.get(
-            "/transactions",
-            {
-              params: {
-                category:
-                  search,
-
-                type,
-
-                page,
-
-                limit: 8,
-              },
-            }
-          );
-
-        setData(res.data.data);
-
-        setTotalPages(
-          Math.ceil(
-            res.data.total /
-              res.data.limit
-          )
-        );
-
-      } catch {
-        toast.error(
-          "Failed to fetch transactions"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-  useEffect(() => {
-    fetchTransactions();
-  }, [
-    refresh,
+  const {
+    data,
+    isLoading,
+  } = useTransactions({
+    page,
     search,
     type,
-    page,
-  ]);
+  });
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, type]);
 
   const handleDelete =
     async (id: string) => {
@@ -126,7 +87,9 @@ const TransactionTable = ({
           "Transaction deleted"
         );
 
-        fetchTransactions();
+        queryClient.invalidateQueries({
+          queryKey: ["transactions"],
+        });
 
       } catch {
         toast.error(
@@ -135,7 +98,7 @@ const TransactionTable = ({
       }
     };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div
         className="
@@ -181,7 +144,9 @@ const TransactionTable = ({
         </h2>
 
         <CSVLink
-          data={data}
+          data={
+            data?.transactions || []
+          }
           filename="transactions.csv"
           className="
             bg-indigo-600
@@ -202,6 +167,7 @@ const TransactionTable = ({
       {/* Table */}
       <div
         className="
+          overflow-x-auto
           rounded-3xl
           bg-white/80
           backdrop-blur-xl
@@ -243,78 +209,87 @@ const TransactionTable = ({
 
           <TableBody>
 
-            {data.map((tx) => (
-              <TableRow
-                key={tx._id}
-              >
-                <TableCell className="font-medium capitalize">
-                  {tx.category}
-                </TableCell>
+            {data?.transactions.map(
+              (tx:any) => (
+                <TableRow
+                  key={tx._id}
+                >
+                  <TableCell className="font-medium capitalize">
+                    {tx.category}
+                  </TableCell>
 
-                <TableCell className="font-semibold">
-                  ₹{tx.amount}
-                </TableCell>
+                  <TableCell className="font-semibold">
+                    ₹{tx.amount}
+                  </TableCell>
 
-                <TableCell>
+                  <TableCell>
 
-                  <Badge
-                    className={
-                      tx.type ===
-                      "income"
-                        ? "bg-green-100 text-green-700 hover:bg-green-100"
-                        : "bg-red-100 text-red-700 hover:bg-red-100"
-                    }
-                  >
-                    {tx.type}
-                  </Badge>
-
-                </TableCell>
-
-                <TableCell>
-                  {new Date(
-                    tx.date
-                  ).toLocaleDateString()}
-                </TableCell>
-
-                <TableCell>
-                  {tx.notes || "-"}
-                </TableCell>
-
-                <TableCell>
-
-                  <div className="flex items-center gap-4">
-
-                    <EditTransactionModal
-                      transaction={
-                        tx
+                    <Badge
+                      className={
+                        tx.type ===
+                        "income"
+                          ? "bg-green-100 text-green-700 hover:bg-green-100"
+                          : "bg-red-100 text-red-700 hover:bg-red-100"
                       }
-                      onSuccess={
-                        fetchTransactions
-                      }
-                    />
-
-                    <button
-                      onClick={() =>
-                        handleDelete(
-                          tx._id
-                        )
-                      }
-                      className="
-                        text-red-500
-                        hover:text-red-700
-                      "
                     >
-                      <Trash2
-                        size={18}
+                      {tx.type}
+                    </Badge>
+
+                  </TableCell>
+
+                  <TableCell>
+                    {new Date(
+                      tx.date
+                    ).toLocaleDateString()}
+                  </TableCell>
+
+                  <TableCell>
+                    {tx.notes || "-"}
+                  </TableCell>
+
+                  <TableCell>
+
+                    <div className="flex items-center gap-4">
+
+                      <EditTransactionModal
+                        transaction={
+                          tx
+                        }
+                        onSuccess={() =>
+                          queryClient.invalidateQueries({
+                            queryKey:
+                              queryKeys.transactions(
+                                page,
+                                search,
+                                type
+                              ),
+                          })
+                        }
                       />
-                    </button>
 
-                  </div>
+                      <button
+                        onClick={() =>
+                          handleDelete(
+                            tx._id
+                          )
+                        }
+                        className="
+                          text-red-500
+                          hover:text-red-700
+                        "
+                      >
+                        <Trash2
+                          size={18}
+                        />
+                      </button>
 
-                </TableCell>
+                    </div>
 
-              </TableRow>
-            ))}
+                  </TableCell>
+
+                </TableRow>
+              )
+            )}
 
           </TableBody>
 
@@ -356,12 +331,15 @@ const TransactionTable = ({
           "
         >
           Page {page} of{" "}
-          {totalPages}
+          {data?.pagination
+            .pages || 1}
         </div>
 
         <button
           disabled={
-            page === totalPages
+            page ===
+            (data?.pagination
+              .pages || 1)
           }
           onClick={() =>
             setPage(

@@ -3,8 +3,8 @@ dotenv.config();
 
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
-import User from "../models/user.model";
-import Transaction from "../models/transaction.model";
+import User from "../models/user.model.js";
+import Transaction from "../models/transaction.model.js";
 
 const seed = async () => {
   try {

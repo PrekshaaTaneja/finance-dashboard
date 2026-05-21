@@ -4,14 +4,14 @@ import {
   deleteTransaction,
   getTransactions,
   updateTransaction,
-} from "../controllers/transaction.controller";
+} from "../controllers/transaction.controller.js";
 import {
   authorize,
   protect,
-} from "../middleware/auth.middleware";
+} from "../middleware/auth.middleware.js";
 
-import { validate } from "../middleware/validate.middleware";
-import { transactionSchema } from "../validators/transaction.validator";
+import { validate } from "../middleware/validate.middleware.js";
+import { transactionSchema } from "../validators/transaction.validator.js";
 
 const router = Router();
 
@@ -45,6 +45,7 @@ router.patch(
   "/:id",
   protect,
   authorize("admin"),
+  validate(transactionSchema),
   updateTransaction
 );
 

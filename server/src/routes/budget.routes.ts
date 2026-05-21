@@ -1,14 +1,16 @@
 import { Router } from "express";
+import { validate } from "../middleware/validate.middleware.js";
+import { budgetSchema } from "../validators/budget.validator.js";
 
 import {
   createBudget,
   getBudgets,
-} from "../controllers/budget.controller";
+} from "../controllers/budget.controller.js";
 
 import {
   protect,
   authorize,
-} from "../middleware/auth.middleware";
+} from "../middleware/auth.middleware.js";
 
 const router = Router();
 
@@ -29,6 +31,7 @@ router.post(
     "admin",
     "analyst"
   ),
+  validate(budgetSchema),
   createBudget
 );
 

@@ -56,9 +56,10 @@ const SignupPage = () => {
 
         navigate("/login");
 
-      } catch {
+      } catch (error: any) {
         toast.error(
-          "Signup failed"
+          error.response?.data?.message ||
+            "Signup failed"
         );
       } finally {
         setLoading(false);

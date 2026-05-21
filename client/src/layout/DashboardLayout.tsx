@@ -8,7 +8,6 @@ const DashboardLayout = () => {
   return (
     <div
       className="
-        flex
         min-h-screen
         bg-gradient-to-br
         from-slate-100
@@ -16,18 +15,43 @@ const DashboardLayout = () => {
         to-indigo-50
       "
     >
-      <Sidebar />
 
+      {/* Sidebar */}
       <div
         className="
-          flex-1
-          flex
-          flex-col
-          min-w-0
+          fixed
+          left-0
+          top-0
+          h-screen
+          w-64
+          z-50
         "
       >
-        <Navbar />
+        <Sidebar />
+      </div>
 
+      {/* Main Content */}
+      <div
+        className="
+          ml-64
+          min-h-screen
+          flex
+          flex-col
+        "
+      >
+
+        {/* Navbar */}
+        <div
+          className="
+            sticky
+            top-0
+            z-40
+          "
+        >
+          <Navbar />
+        </div>
+
+        {/* Page Content */}
         <main
           className="
             flex-1
@@ -35,11 +59,14 @@ const DashboardLayout = () => {
             p-4
             sm:p-6
             lg:p-8
+            container-app
           "
         >
           <Outlet />
         </main>
+
       </div>
+
     </div>
   );
 };

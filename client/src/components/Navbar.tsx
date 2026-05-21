@@ -1,9 +1,6 @@
 import {
   Menu,
-  Moon,
 } from "lucide-react";
-
-import { useTheme } from "next-themes";
 
 import { useEffect, useState } from "react";
 
@@ -17,11 +14,6 @@ const Navbar = () => {
 
   const { toggleSidebar } =
     useSidebarStore();
-
-  const {
-    theme,
-    setTheme,
-  } = useTheme();
 
   const [mounted, setMounted] =
     useState(false);
@@ -90,35 +82,6 @@ const Navbar = () => {
 
       {/* Right */}
       <div className="flex items-center gap-4">
-
-        {/* Theme Toggle */}
-        {mounted && (
-          <button
-            onClick={() =>
-              setTheme(
-                theme === "dark"
-                  ? "light"
-                  : "dark"
-              )
-            }
-            className="
-              w-10
-              h-10
-              rounded-xl
-              bg-white
-              border
-              border-slate-200
-              shadow-sm
-              hover:shadow-md
-              transition
-              flex
-              items-center
-              justify-center
-            "
-            >
-            <Moon size={18} />
-          </button>
-        )}
 
         {/* User */}
         <div className="flex items-center gap-3">

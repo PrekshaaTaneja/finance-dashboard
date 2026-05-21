@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import Transaction from "../models/transaction.model";
-import { AuthRequest } from "../middleware/auth.middleware";
+import Transaction from "../models/transaction.model.js";
+import { AuthRequest } from "../middleware/auth.middleware.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const createTransaction = async (
   req: AuthRequest,
@@ -21,68 +22,97 @@ export const createTransaction = async (
     return res.status(500).json({
       success: false,
       message: "Failed to create transaction",
-      error,
     });
   }
 };
 
-export const getTransactions = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    const {
-        type,
-        category,
-        page = 1,
-        limit = 8,
-    } = req.query;
+export const getTransactions =
+  asyncHandler(
+    async (
+      req: AuthRequest,
+      res: Response
+    ) => {
+      const page =
+        Number(req.query.page) || 1;
 
-    const filters: any = {};
+      const limit =
+        Number(req.query.limit) || 10;
 
-    if (type) filters.type = type;
-    if (category) {
-      filters.category = {
-        $regex: category,
-        $options: "i",
+      const skip =
+        (page - 1) * limit;
+
+      const search =
+        (req.query.search as string) || "";
+
+      const type =
+        (req.query.type as string) || "";
+
+      const sort =
+        (req.query.sort as string) ||
+        "-date";
+
+      const query: any = {
+        createdBy: req.user?.userId,
       };
+
+      if (search) {
+        query.category = {
+          $regex: search,
+          $options: "i",
+        };
+      }
+
+      if (type) {
+        query.type = type;
+      }
+
+      const transactions =
+        await Transaction.find(query)
+          .sort(sort)
+          .skip(skip)
+          .limit(limit);
+
+      const total =
+        await Transaction.countDocuments(
+          query
+        );
+
+      res.status(200).json({
+        success: true,
+        data: {
+          transactions,
+          pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(
+              total / limit
+            ),
+          },
+        },
+      });
     }
-
-    const skip = (Number(page) - 1) * Number(limit);
-
-    const transactions = await Transaction.find(filters)
-      .sort({ date: -1 })
-      .skip(skip)
-      .limit(Number(limit));
-
-    const total = await Transaction.countDocuments(filters);
-
-    return res.status(200).json({
-      success: true,
-      total,
-      page: Number(page),
-      limit: Number(limit),
-      data: transactions,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch transactions",
-      error,
-    });
-  }
-};
+  );
 
 export const updateTransaction = async (
   req: AuthRequest,
   res: Response
 ) => {
   try {
-    const transaction = await Transaction.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+
+    delete req.body.createdBy;
+    const transaction =
+      await Transaction.findOneAndUpdate(
+        {
+          _id: req.params.id,
+          createdBy:
+            req.user!.userId,
+        } as any,
+        req.body,
+        {
+          new: true,
+        }
+      );
 
     if (!transaction) {
       return res.status(404).json({
@@ -100,7 +130,6 @@ export const updateTransaction = async (
     return res.status(500).json({
       success: false,
       message: "Failed to update transaction",
-      error,
     });
   }
 };
@@ -110,9 +139,14 @@ export const deleteTransaction = async (
   res: Response
 ) => {
   try {
-    const transaction = await Transaction.findByIdAndDelete(
-      req.params.id
-    );
+    const transaction =
+      await Transaction.findOneAndDelete(
+        {
+          _id: req.params.id,
+          createdBy:
+            req.user!.userId,
+        } as any
+      );
 
     if (!transaction) {
       return res.status(404).json({
@@ -129,7 +163,6 @@ export const deleteTransaction = async (
     return res.status(500).json({
       success: false,
       message: "Failed to delete transaction",
-      error,
     });
   }
 };

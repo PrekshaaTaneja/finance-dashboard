@@ -16,3 +16,7 @@ body {
 .dark body {
   @apply bg-[#0F172A] text-slate-100;
 }
+
+.container-app {
+  @apply max-w-7xl mx-auto w-full;
+}

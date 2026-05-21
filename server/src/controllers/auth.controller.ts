@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import User from "../models/user.model";
-import { generateToken } from "../utils/generateToken";
+import User from "../models/user.model.js";
+import { generateToken } from "../utils/generateToken.js";
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
@@ -21,22 +21,24 @@ export const registerUser = async (req: Request, res: Response) => {
       name,
       email,
       password: hashedPassword,
-      role,
+      role: role || "viewer",
     });
-
-    const token = generateToken(user._id.toString(), user.role);
 
     return res.status(201).json({
       success: true,
       message: "User registered successfully",
-      token,
-      user,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isActive: user.isActive,
+      },
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
       message: "Registration failed",
-      error,
     });
   }
 };
@@ -67,13 +69,18 @@ export const loginUser = async (req: Request, res: Response) => {
       success: true,
       message: "Login successful",
       token,
-      user,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isActive: user.isActive,
+      },
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
       message: "Login failed",
-      error,
     });
   }
 };

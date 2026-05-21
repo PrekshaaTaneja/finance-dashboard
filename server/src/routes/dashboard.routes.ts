@@ -5,11 +5,11 @@ import {
   getMonthlyTrend,
   getRecentTransactions,
   getAdvancedAnalytics,
-} from "../controllers/dashboard.controller";
+} from "../controllers/dashboard.controller.js";
 import {
   authorize,
   protect,
-} from "../middleware/auth.middleware";
+} from "../middleware/auth.middleware.js";
 
 const router = Router();
 

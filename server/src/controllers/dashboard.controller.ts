@@ -1,135 +1,203 @@
 import { Response } from "express";
-import Transaction from "../models/transaction.model";
-import { AuthRequest } from "../middleware/auth.middleware";
+
+import Transaction from "../models/transaction.model.js";
+import mongoose from "mongoose";
+import { AuthRequest } from "../middleware/auth.middleware.js";
 
 export const getDashboardSummary = async (
-  _req: AuthRequest,
+  req: AuthRequest,
   res: Response
 ) => {
   try {
-    const summary = await Transaction.aggregate([
-      {
-        $group: {
-          _id: "$type",
-          total: { $sum: "$amount" },
+    const summary =
+      await Transaction.aggregate([
+        {
+          $match: {
+            createdBy: new mongoose.Types.ObjectId(
+              req.user?.userId
+            ),
+          },
         },
-      },
-    ]);
+        {
+          $group: {
+            _id: "$type",
+            total: {
+              $sum: "$amount",
+            },
+          },
+        },
+      ]);
 
     const income =
-      summary.find((item) => item._id === "income")?.total || 0;
+      summary.find(
+        (item) =>
+          item._id === "income"
+      )?.total || 0;
+
     const expense =
-      summary.find((item) => item._id === "expense")?.total || 0;
+      summary.find(
+        (item) =>
+          item._id === "expense"
+      )?.total || 0;
 
     return res.status(200).json({
       success: true,
       data: {
         totalIncome: income,
         totalExpense: expense,
-        netBalance: income - expense,
+        netBalance:
+          income - expense,
       },
     });
+
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch dashboard summary",
-      error,
+      message:
+        "Failed to fetch dashboard summary",
     });
   }
 };
 
-export const getCategoryBreakdown = async (
-  _req: AuthRequest,
-  res: Response
-) => {
-  try {
-    const categories = await Transaction.aggregate([
-      {
-        $group: {
-          _id: "$category",
-          total: { $sum: "$amount" },
-        },
-      },
-      {
-        $sort: { total: -1 },
-      },
-    ]);
-
-    return res.status(200).json({
-      success: true,
-      data: categories,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch category breakdown",
-      error,
-    });
-  }
-};
-
-export const getMonthlyTrend = async (
-  _req: AuthRequest,
-  res: Response
-) => {
-  try { 
-    const trends = await Transaction.aggregate([
-      {
-        $group: {
-          _id: {
-            month: { $month: "$date" },
+export const getCategoryBreakdown =
+  async (
+    req: AuthRequest,
+    res: Response
+  ) => {
+    try {
+      const categories =
+        await Transaction.aggregate([
+          {
+            $match: {
+              createdBy: new mongoose.Types.ObjectId(
+                req.user?.userId
+              ),
+            },
           },
-          total: { $sum: "$amount" },
-        },
-      },
-      {
-        $sort: { month: 1 },
-      },
-    ]);
+          {
+            $group: {
+              _id: "$category",
+              total: {
+                $sum: "$amount",
+              },
+            },
+          },
+          {
+            $sort: {
+              total: -1,
+            },
+          },
+        ]);
 
-    return res.status(200).json({
-      success: true,
-      data: trends,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch monthly trends",
-      error,
-    });
-  }
-};
+      return res.status(200).json({
+        success: true,
+        data: categories,
+      });
 
-export const getRecentTransactions = async (
-  _req: AuthRequest,
-  res: Response
-) => {
-  try {
-    const recent = await Transaction.find()
-      .sort({ createdAt: -1 })
-      .limit(5);
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to fetch category breakdown",
+      });
+    }
+  };
 
-    return res.status(200).json({
-      success: true,
-      data: recent,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch recent transactions",
-      error,
-    });
-  }
-};
+export const getMonthlyTrend =
+  async (
+    req: AuthRequest,
+    res: Response
+  ) => {
+    try {
+      const trends =
+        await Transaction.aggregate([
+          {
+            $match: {
+              createdBy: new mongoose.Types.ObjectId(
+                req.user?.userId
+              ),
+            },
+          },
+          {
+            $group: {
+              _id: {
+                $month: "$date",
+              },
+
+              total: {
+                $sum: "$amount",
+              },
+            },
+          },
+          {
+            $sort: {
+              _id: 1,
+            },
+          },
+        ]);
+
+        const formattedTrends = trends.map(
+          (item) => ({
+            month: item._id,
+            total: item.total,
+          })
+        );
+
+      return res.status(200).json({
+        success: true,
+        data: formattedTrends,
+      });
+
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to fetch monthly trends",
+      });
+    }
+  };
+
+export const getRecentTransactions =
+  async (
+    req: AuthRequest,
+    res: Response
+  ) => {
+    try {
+      const recent =
+        await Transaction.find({
+          createdBy:
+            req.user!.userId,
+        })
+          .sort({
+            createdAt: -1,
+          })
+          .limit(5);
+
+      return res.status(200).json({
+        success: true,
+        data: recent,
+      });
+
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to fetch recent transactions",
+      });
+    }
+  };
 
 export const getAdvancedAnalytics =
   async (
-    _req: AuthRequest,
+    req: AuthRequest,
     res: Response
   ) => {
     try {
       const transactions =
-        await Transaction.find();
+        await Transaction.find({
+          createdBy:
+            req.user!.userId,
+        });
 
       const totalTransactions =
         transactions.length;
@@ -138,11 +206,13 @@ export const getAdvancedAnalytics =
         transactions
           .filter(
             (t) =>
-              t.type === "income"
+              t.type ===
+              "income"
           )
           .reduce(
             (acc, curr) =>
-              acc + curr.amount,
+              acc +
+              curr.amount,
             0
           );
 
@@ -150,11 +220,13 @@ export const getAdvancedAnalytics =
         transactions
           .filter(
             (t) =>
-              t.type === "expense"
+              t.type ===
+              "expense"
           )
           .reduce(
             (acc, curr) =>
-              acc + curr.amount,
+              acc +
+              curr.amount,
             0
           );
 
@@ -168,19 +240,27 @@ export const getAdvancedAnalytics =
           : 0;
 
       const categoryTotals:
-        Record<string, number> =
-        {};
+        Record<
+          string,
+          number
+        > = {};
 
-      transactions.forEach((t) => {
-        if (t.type === "expense") {
-          categoryTotals[
-            t.category
-          ] =
-            (categoryTotals[
+      transactions.forEach(
+        (t) => {
+          if (
+            t.type ===
+            "expense"
+          ) {
+            categoryTotals[
               t.category
-            ] || 0) + t.amount;
+            ] =
+              (categoryTotals[
+                t.category
+              ] || 0) +
+              t.amount;
+          }
         }
-      });
+      );
 
       let topCategory =
         "No Expenses";
@@ -190,13 +270,17 @@ export const getAdvancedAnalytics =
       for (const category in categoryTotals) {
 
         const amount =
-          categoryTotals[category] ?? 0;
+          categoryTotals[
+            category
+          ] ?? 0;
 
-        if (amount > maxAmount) {
-
+        if (
+          amount > maxAmount
+        ) {
           maxAmount = amount;
 
-          topCategory = category;
+          topCategory =
+            category;
         }
       }
 

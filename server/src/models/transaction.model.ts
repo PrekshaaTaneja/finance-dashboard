@@ -17,6 +17,10 @@ const transactionSchema = new Schema<ITransaction>(
       type: Number,
       required: true,
       min: 0,
+      validate: {
+        validator: (v: number) => v > 0,
+        message: "Amount must be positive",
+      },
     },
     type: {
       type: String,
@@ -44,6 +48,11 @@ const transactionSchema = new Schema<ITransaction>(
   },
   { timestamps: true }
 );
+
+transactionSchema.index({
+  createdBy: 1,
+  date: -1,
+});
 
 export default mongoose.model<ITransaction>(
   "Transaction",

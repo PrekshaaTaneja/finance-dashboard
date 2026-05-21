@@ -62,9 +62,10 @@ const LoginPage = () => {
 
         navigate("/");
 
-      } catch {
+      } catch (error: any){
         toast.error(
-          "Invalid credentials"
+          error.response?.data?.message ||
+            "Login failed"
         );
       } finally {
         setLoading(false);

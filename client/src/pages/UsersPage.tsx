@@ -7,6 +7,8 @@ import UserTable from "@/components/UserTable";
 import { Input } from "@/components/ui/input";
 
 import PageHeader from "@/components/PageHeader";
+import { useAuth } from "@/context/AuthContext";
+import useDebounce from "@/hooks/useDebounce";
 
 const UsersPage = () => {
 
@@ -16,9 +18,14 @@ const UsersPage = () => {
   const [search, setSearch] =
     useState("");
 
+  const debouncedSearch =
+    useDebounce(search);
+
   const triggerRefresh = () => {
     setRefresh((prev) => !prev);
   };
+
+  const { user } = useAuth();
 
   return (
     <div className="space-y-8">
@@ -30,9 +37,11 @@ const UsersPage = () => {
           description="Manage user roles and account access."
         />
 
-        <AddUserModal
-          onSuccess={triggerRefresh}
-        />
+        {user?.role === "admin" && (
+          <AddUserModal
+            onSuccess={triggerRefresh}
+          />
+        )}
 
       </div>
 
@@ -47,7 +56,7 @@ const UsersPage = () => {
 
       <UserTable
         refresh={refresh}
-        search={search}
+        search={debouncedSearch}      
       />
 
     </div>

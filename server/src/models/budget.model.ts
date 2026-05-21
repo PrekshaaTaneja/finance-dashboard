@@ -51,6 +51,13 @@ const budgetSchema =
     { timestamps: true }
   );
 
+
+budgetSchema.index({
+  createdBy: 1,
+  category: 1,
+  month: 1,
+});
+
 export default mongoose.model<IBudget>(
   "Budget",
   budgetSchema

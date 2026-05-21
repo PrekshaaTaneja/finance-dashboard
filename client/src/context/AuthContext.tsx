@@ -1,3 +1,4 @@
+import type { User } from "@/types/user";
 import {
   createContext,
   useContext,
@@ -6,18 +7,13 @@ import {
   type ReactNode,
 } from "react";
 
-interface User {
-  name: string;
-
-  email: string;
-
-  role: string;
-}
 
 interface AuthContextType {
   user: User | null;
 
   token: string | null;
+
+  isLoading: boolean;
 
   login: (
     token: string,
@@ -37,12 +33,14 @@ export const AuthProvider = ({
 }: {
   children: ReactNode;
 }) => {
-
   const [user, setUser] =
     useState<User | null>(null);
 
   const [token, setToken] =
     useState<string | null>(null);
+
+  const [isLoading, setIsLoading] =
+    useState(true);
 
   useEffect(() => {
     const storedToken =
@@ -65,6 +63,8 @@ export const AuthProvider = ({
         JSON.parse(storedUser)
       );
     }
+
+    setIsLoading(false);
   }, []);
 
   const login = (
@@ -98,9 +98,6 @@ export const AuthProvider = ({
     setToken(null);
 
     setUser(null);
-
-    window.location.href =
-      "/login";
   };
 
   return (
@@ -108,6 +105,7 @@ export const AuthProvider = ({
       value={{
         user,
         token,
+        isLoading,
         login,
         logout,
       }}

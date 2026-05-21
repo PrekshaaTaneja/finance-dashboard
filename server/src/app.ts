@@ -3,23 +3,37 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
+import rateLimit from "express-rate-limit";
 
-import authRoutes from "./routes/auth.routes";
-import transactionRoutes from "./routes/transaction.routes";
-import dashboardRoutes from "./routes/dashboard.routes";
+import authRoutes from "./routes/auth.routes.js";
+import transactionRoutes from "./routes/transaction.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
 
-import swaggerSpec from "./docs/swagger";
+import swaggerSpec from "./docs/swagger.js";
 import {
   globalErrorHandler,
   notFoundHandler,
-} from "./middleware/error.middleware";
-import userRoutes from "./routes/user.routes";
-import budgetRoutes from "./routes/budget.routes";
+} from "./middleware/error.middleware.js";
+import userRoutes from "./routes/user.routes.js";
+import budgetRoutes from "./routes/budget.routes.js";
 
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+});
+
+app.use(limiter);
+app.use(
+  cors({
+    origin:
+      process.env.CLIENT_URL ||
+      "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(helmet());
 app.use(morgan("dev"));
 app.use("/api/v1/users", userRoutes);

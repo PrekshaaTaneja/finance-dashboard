@@ -5,6 +5,7 @@ import {
   X,
   Wallet,
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 import { NavLink } from "react-router-dom";
 
@@ -16,6 +17,7 @@ const Sidebar = () => {
     isOpen,
     closeSidebar,
   } = useSidebarStore();
+  const { user } = useAuth();
 
   return (
     <>
@@ -189,31 +191,33 @@ const Sidebar = () => {
               <Wallet size={20} />
               Budgets
             </NavLink>
-          <NavLink
-            to="/users"
-            onClick={closeSidebar}
-            className={({ isActive }) =>
+          {user?.role === "admin" && (
+            <NavLink
+              to="/users"
+              onClick={closeSidebar}
+              className={({ isActive }) =>
+                `
+                flex
+                items-center
+                gap-3
+                px-4
+                py-3
+                rounded-xl
+                transition-all
+                duration-200
+                font-medium
+                ${
+                  isActive
+                    ? "bg-indigo-500 text-white shadow-lg"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                }
               `
-              flex
-              items-center
-              gap-3
-              px-4
-              py-3
-              rounded-xl
-              transition-all
-              duration-200
-              font-medium
-              ${
-                isActive
-                  ? "bg-indigo-500 text-white shadow-lg"
-                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
               }
-            `
-            }
-          >
-            <Users size={20} />
-            Users
-          </NavLink>
+            >
+              <Users size={20} />
+              Users
+            </NavLink>
+          )}
         </nav>
 
         {/* Bottom */}

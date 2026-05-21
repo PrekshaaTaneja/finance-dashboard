@@ -118,6 +118,7 @@ const UserTable = ({
   return (
     <div
       className="
+        overflow-x-auto
         rounded-3xl
         bg-white/80
         backdrop-blur-xl
