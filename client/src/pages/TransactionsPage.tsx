@@ -1,11 +1,14 @@
 import { useState } from "react";
 
-// import AddTransactionModal from "@/components/AddTransactionModal";
+import AddTransactionModal from "@/components/AddTransactionModal";
 import TransactionTable from "@/components/TransactionTable";
+
+import PageHeader from "@/components/PageHeader";
+
 import { Input } from "@/components/ui/input";
 
 const TransactionsPage = () => {
-  const [refresh] =
+  const [refresh, setRefresh] =
     useState(false);
 
   const [search, setSearch] =
@@ -14,16 +17,43 @@ const TransactionsPage = () => {
   const [type, setType] =
     useState("");
 
-  // const triggerRefresh = () => {
-  //   setRefresh((prev) => !prev);
-  // };
+  const triggerRefresh = () => {
+    setRefresh((prev) => !prev);
+  };
 
   return (
     <div className="space-y-6">
 
-      {/* Header */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Top Header */}
+      <div
+        className="
+          flex
+          flex-col
+          gap-4
+          lg:flex-row
+          lg:items-center
+          lg:justify-between
+        "
+      >
+        <PageHeader
+          title="Transactions"
+          description="Manage and monitor financial transactions."
+        />
 
+        <AddTransactionModal
+          onSuccess={triggerRefresh}
+        />
+      </div>
+
+      {/* Filters */}
+      <div
+        className="
+          grid
+          grid-cols-1
+          md:grid-cols-2
+          gap-4
+        "
+      >
         <Input
           placeholder="Search category..."
           value={search}
@@ -63,18 +93,15 @@ const TransactionsPage = () => {
           <option value="expense">
             Expense
           </option>
-
         </select>
-
       </div>
 
-      {/* Table */}
+      {/* Transactions Table */}
       <TransactionTable
         refresh={refresh}
         search={search}
         type={type}
       />
-
     </div>
   );
 };
